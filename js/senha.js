@@ -1,100 +1,97 @@
-const container = document.querySelector('.container');
-const registerBtn = document.querySelector('.register-btn');
-const loginBtn = document.querySelector('.login-btn');
-const loginForm = document.getElementById('login-form');
-const registerForm = document.getElementById('register-form');
+let emailGlobal = null;
+let usuarioId = null;
 
-let usuarioRecuperado = null;
-
-// Alternar os painéis
-registerBtn.addEventListener('click', () => container.classList.add('active'));
-loginBtn.addEventListener('click', () => container.classList.remove('active'));
-
-// Verificação do email + palavra-chave
-loginForm.addEventListener('submit', async (event) => {
-  event.preventDefault();
-
-  const email = document.getElementById('login-email').value;
-  const palavraChave = document.getElementById('login-senha').value;
+// Etapa 1: Enviar código
+async function enviarCodigo() {
+  const email = document.getElementById('email-recuperacao').value;
+  emailGlobal = email;
 
   try {
-    const response = await fetch('http://localhost:5050/v1/planify/usuario');
-    const data = await response.json();
+    const response = await fetch('http://localhost:8080/v1/planify/recuperar-senha', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email })
+    });
+
+    const result = await response.json();
+    alert(result.message);
 
     if (response.ok) {
-      const usuarios = data.usuario;
-
-      const encontrado = usuarios.find(u =>
-        u.email.trim().toLowerCase() === email.trim().toLowerCase() &&
-        u.palavra_chave.trim().toLowerCase() === palavraChave.trim().toLowerCase()
-      );
-
-      if (encontrado) {
-        // Padronizar os campos para usar no PUT
-        usuarioRecuperado = {
-          id: encontrado.id_usuario, // Usa id_usuario corretamente
-          nome: encontrado.nome,
-          email: encontrado.email,
-          senha: encontrado.senha,
-          data_nascimento: encontrado.data_nascimento.split('T')[0], // "2000-05-22"
-          palavra_chave: encontrado.palavra_chave,
-          foto_perfil: encontrado.foto_perfil
-        };
-        container.classList.add('active');
-      } else {
-        alert('❌ Palavra-chave ou email incorretos.');
-      }
-    } else {
-      alert('❌ Erro ao buscar usuários: ' + data.message);
+      document.getElementById('etapa-email').classList.add('hidden');
+      document.getElementById('etapa-codigo').classList.remove('hidden');
     }
   } catch (error) {
-    alert('❌ Erro na requisição: ' + error.message);
+    alert('❌ Erro ao enviar código: ' + error.message);
   }
-});
+}
 
-// Redefinir a senha
-registerForm.addEventListener('submit', async (e) => {
-  e.preventDefault();
+// Etapa 2: Validar código
+async function validarCodigo() {
+  const codigo = document.getElementById('codigo-validacao').value;
+  const msg = document.getElementById('mensagem-erro');
 
-  const novaSenha = document.getElementById('nova-senha').value;
-  const confirmarSenha = document.getElementById('confirmar-senha').value;
+  if (!codigo) {
+    msg.textContent = "❌ Digite o código recebido por e-mail.";
+    return;
+  }
 
-  if (novaSenha !== confirmarSenha) {
+  try {
+    const response = await fetch('http://localhost:8080/v1/planify/validar-codigo', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: emailGlobal, codigo })
+    });
+
+    const result = await response.json();
+    console.log('Resposta da API de validação:', result); // <-- Debug
+
+    msg.textContent = result.message;
+
+    if (response.ok && result.id_usuario) {
+      usuarioId = result.id_usuario;
+      document.getElementById('etapa-codigo').classList.add('hidden');
+      document.getElementById('etapa-senha').classList.remove('hidden');
+    } else {
+      msg.textContent = "❌ Código inválido ou expirado.";
+    }
+  } catch (error) {
+    msg.textContent = "❌ Erro na validação do código: " + error.message;
+  }
+}
+
+// Etapa 3: Redefinir senha
+async function redefinirSenha() {
+  const nova = document.getElementById('nova-senha').value;
+  const confirmar = document.getElementById('confirmar-senha').value;
+
+  if (!usuarioId) {
+    return alert('❌ Não foi possível identificar o usuário. Valide o código novamente.');
+  }
+
+  if (nova !== confirmar) {
     return alert('❌ As senhas não coincidem.');
   }
 
-  if (novaSenha.length > 20) {
-    return alert('❌ A nova senha deve ter no máximo 20 caracteres.');
+  if (nova.length > 20) {
+    return alert('❌ A senha deve ter até 20 caracteres.');
   }
-
-  if (!usuarioRecuperado || !usuarioRecuperado.id) {
-    return alert('❌ Usuário não identificado. Volte e tente novamente.');
-  }
-
-  const dadosAtualizados = {
-    nome: usuarioRecuperado.nome,
-    email: usuarioRecuperado.email,
-    senha: novaSenha,
-    data_nascimento: usuarioRecuperado.data_nascimento,
-    palavra_chave: usuarioRecuperado.palavra_chave,
-    foto_perfil: usuarioRecuperado.foto_perfil
-  };
 
   try {
-    const response = await fetch(`http://localhost:5050/v1/planify/usuario/${usuarioRecuperado.id}`, {
+    const response = await fetch(`http://localhost:8080/v1/planify/usuario/senha/${usuarioId}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(dadosAtualizados)
+      body: JSON.stringify({ senha: nova })
     });
 
+    const result = await response.json();
+    console.log('Resposta da redefinição:', result); // <-- Debug
+
+    alert(result.message || 'Senha redefinida com sucesso.');
+
     if (response.ok) {
-      alert('✅ Senha redefinida com sucesso!');
       window.location.href = 'index.html';
-    } else {
-      const result = await response.json();
-      alert('❌ Erro ao redefinir senha: ' + result.message);
     }
   } catch (error) {
-    alert('❌ Erro: ' + error.message);
+    alert('❌ Erro ao redefinir senha: ' + error.message);
   }
-});
+}

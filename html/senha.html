@@ -2,64 +2,142 @@
 <html lang="pt-br">
 <head>
   <meta charset="UTF-8" />
-  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Planify - Recuperar Senha</title>
   <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet" />
   <link rel="stylesheet" href="../css/senha.css" />
   <script src="../js/senha.js" defer></script>
-  <link rel="icon" href="../img/logo.jpg">
-</head>
+  <style>
+    body {
+      font-family: 'Poppins', sans-serif;
+      background: linear-gradient(90deg, #e2e2e2, #c9d6ff);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      margin: 0;
+    }
 
+    .container {
+      background: #fff;
+      border-radius: 20px;
+      box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+      padding: 40px;
+      width: 100%;
+      max-width: 500px;
+    }
+
+    .form-box {
+      display: none;
+      flex-direction: column;
+      gap: 15px;
+    }
+
+    .form-box:not(.hidden) {
+      display: flex;
+    }
+
+    h1 {
+      font-size: 24px;
+      margin-bottom: 10px;
+      text-align: center;
+    }
+
+    .input-box {
+      position: relative;
+    }
+
+    .input-box input {
+      width: 100%;
+      padding: 12px 20px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      font-size: 16px;
+    }
+
+    .input-box i {
+      position: absolute;
+      right: 15px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #888;
+    }
+
+    .btn {
+      padding: 12px;
+      background-color: #194fe2;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background 0.3s ease;
+    }
+
+    .btn:hover {
+      background-color: #123ebd;
+    }
+
+    .Voltar {
+      margin-top: 15px;
+      text-align: center;
+    }
+
+    .Voltar a {
+      color: #194fe2;
+      text-decoration: none;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    #mensagem-erro {
+      color: red;
+      text-align: center;
+    }
+  </style>
+</head>
 <body>
   <div class="container">
-    
-    <!-- Formulário para verificar palavra-chave -->
-    <div class="form-box login">
-      <form id="login-form">
-        <h1>Sua Palavra Chave</h1>
-        <div class="input-box">
-          <input type="email" id="login-email" placeholder="Email" required />
-          <i class="bx bx-user"></i>
-        </div>
-        <div class="input-box">
-          <input type="password" id="login-senha" placeholder="Palavra Chave" required />
-          <i class="bx bx-key"></i>
-        </div>
-        <div class="Voltar">
-          <a href="./index.html">Voltar</a>
-        </div>
-        <button type="submit" class="btn">Verificar</button>
-      </form>
+
+    <!-- Etapa 1: Email -->
+    <div class="form-box" id="etapa-email">
+      <h1>Recuperar Senha</h1>
+      <div class="input-box">
+        <input type="email" id="email-recuperacao" placeholder="Digite seu e-mail" required />
+        <i class="bx bx-envelope"></i>
+      </div>
+      <button class="btn" onclick="enviarCodigo()">Enviar Código</button>
     </div>
 
-    <!-- Formulário para redefinir a senha -->
-    <div class="form-box register">
-      <form id="register-form">
-        <h1>Nova Senha</h1>
-        <div class="input-box">
-          <input type="password" id="nova-senha" placeholder="Digite a Nova Senha" required />
-          <i class="bx bx-lock"></i>
-        </div>
-        <div class="input-box">
-          <input type="password" id="confirmar-senha" placeholder="Confirme a Nova Senha" required />
-          <i class="bx bx-lock-alt"></i>
-        </div>
-        <button type="submit" class="btn">Salvar Nova Senha</button>
-      </form>
+    <!-- Etapa 2: Código -->
+    <div class="form-box hidden" id="etapa-codigo">
+      <h1>Verificação</h1>
+      <div class="input-box">
+        <input type="text" id="codigo-validacao" placeholder="Digite o código" required />
+        <i class="bx bx-key"></i>
+      </div>
+      <p id="mensagem-erro"></p>
+      <button class="btn" onclick="validarCodigo()">Validar Código</button>
     </div>
 
-    <div class="toggle-box">
-      <div class="toggle-panel toggle-left">
-        <h1>Crie sua nova Senha</h1>
-        <p>Após validar sua palavra-chave</p>
-        <button class="btn register-btn">Nova Senha</button>
+    <!-- Etapa 3: Nova senha -->
+    <div class="form-box hidden" id="etapa-senha">
+      <h1>Nova Senha</h1>
+      <div class="input-box">
+        <input type="password" id="nova-senha" placeholder="Nova senha" required />
+        <i class="bx bx-lock"></i>
       </div>
-      <div class="toggle-panel toggle-right">
-        <h1>Recuperar Senha</h1>
-        <p>Informe seu email e palavra-chave</p>
-        <button class="btn login-btn">Validar Palavra-Chave</button>
+      <div class="input-box">
+        <input type="password" id="confirmar-senha" placeholder="Confirmar senha" required />
+        <i class="bx bx-lock-alt"></i>
       </div>
+      <button class="btn" onclick="redefinirSenha()">Redefinir</button>
+    </div>
+
+    <div class="Voltar">
+      <a href="./index.html">← Voltar ao login</a>
     </div>
   </div>
 </body>

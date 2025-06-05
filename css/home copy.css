@@ -337,33 +337,3 @@ footer p {
 .card-evento p strong {
   color: #222;
 }
-
-
-.events-grid .compra{
-  display: inline-block;
-  padding: 15px 30px;
-  border: none;
-  border-radius: 12px;
-  background-color: #007BFF;
-  color: #fff;
-  text-decoration: none;
-  font-weight: 600;
-  font-size: 16px;
-  cursor: pointer;
-}
-
-.compra {
-  display: inline-block;
-  padding: 10px 15px;
-  background-color: #28a745;
-  color: white;
-  border-radius: 5px;
-  text-decoration: none;
-  font-weight: bold;
-  margin-top: 10px;
-  transition: background-color 0.3s ease;
-}
-
-.compra:hover {
-  background-color: #218838;
-}

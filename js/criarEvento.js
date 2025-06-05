@@ -1,33 +1,35 @@
 const input = document.getElementById('foto');
-const preview = document.getElementById('image-preview');
 const btnCadastrar = document.querySelector('.btn');
 const selectCategoria = document.getElementById('categoria');
+const fotoUrlInput = document.getElementById('foto_url');
+const preview = document.getElementById('preview');
 
-// Carrega imagem
-input.addEventListener('change', (event) => {
-  const file = event.target.files[0];
-  if (file) {
-    const reader = new FileReader();
-    reader.onload = e => preview.src = e.target.result;
-    reader.readAsDataURL(file);
+function enviarImagem() {
+  const url = document.getElementById('foto_url').value;
+  if (url) {
+    localStorage.setItem('imagemEvento', url);
+    window.location.href = 'home.html';
   }
-});
+}
 
 // Carrega categorias da API
 async function carregarCategorias() {
   try {
-    const resposta = await fetch('http://localhost:5050/v1/planify/categoria');
-    const dados = await resposta.json();
+    const resposta = await fetch('http://localhost:8080/v1/planify/categoria');
+    const dados = await resposta.json(); // dados declarado e inicializado aqui
+    console.log("Categorias recebidas:", dados);
 
     selectCategoria.innerHTML = '<option disabled selected>Selecione uma categoria</option>';
 
-    dados.categoria.forEach(cat => {
+    const categorias = dados.categoria || dados; // aqui usamos dados já inicializado
+
+    categorias.forEach(cat => {
       const option = document.createElement('option');
       option.value = cat.id_categoria;
-      option.textContent = cat.categoria; // nome da categoria no seu JSON
+      option.textContent = cat.categoria;
       selectCategoria.appendChild(option);
     });
-    
+
   } catch (erro) {
     console.error('Erro ao carregar categorias:', erro);
     selectCategoria.innerHTML = '<option disabled selected>Erro ao carregar categorias</option>';
@@ -42,7 +44,7 @@ btnCadastrar.addEventListener('click', async () => {
   const data_evento = document.getElementById('data').value;
   const horario = document.getElementById('hora').value;
   const local = document.getElementById('local').value;
-  const imagem = preview.src || '';
+  const imagem = document.getElementById('foto_perfil').value;
   const limite = parseInt(document.getElementById('limite').value);
   const valor_ingresso = parseFloat(document.getElementById('valor').value);
   const usuarioLogado = JSON.parse(localStorage.getItem("usuarioLogado"));
@@ -75,7 +77,7 @@ if (!id_usuario) {
   };
 
   try {
-    const resposta = await fetch('http://localhost:5050/v1/planify/evento', {
+    const resposta = await fetch('http://localhost:8080/v1/planify/evento', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(dados)

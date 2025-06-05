@@ -29,7 +29,7 @@ registerForm.addEventListener('submit', async (event) => {
   };
 
   try {
-    const response = await fetch('http://localhost:5050/v1/planify/usuario', {
+    const response = await fetch('http://localhost:8080/v1/planify/usuario', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(usuario)
@@ -61,7 +61,7 @@ loginForm.addEventListener('submit', async (event) => {
   const senha = document.getElementById('login-senha').value;
 
   try {
-    const response = await fetch('http://localhost:5050/v1/planify/usuario');
+    const response = await fetch('http://localhost:8080/v1/planify/usuario');
     const result = await response.json();
 
     if (response.ok) {
